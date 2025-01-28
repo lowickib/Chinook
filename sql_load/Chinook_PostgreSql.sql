@@ -25,8 +25,6 @@ DROP DATABASE IF EXISTS chinook;
 CREATE DATABASE chinook;
 
 
-\c chinook;
-
 
 /*******************************************************************************
    Create Tables
@@ -15873,4 +15871,3 @@ INSERT INTO playlist_track (playlist_id, track_id) VALUES
     (17, 2096),
     (17, 3290),
     (18, 597);
-

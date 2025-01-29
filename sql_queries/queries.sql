@@ -68,12 +68,8 @@ SELECT
 WHERE previous_invoice_date IS NOT NULL
 
 /*
-4. **Analiza długości tytułów utworów**  
-   Napisz zapytanie, które zwróci:
-   - Identyfikator utworu i jego tytuł.
-   - Długość tytułu (liczba znaków).
-   - Łączną liczbę sprzedaży dla utworu.
-   - Ranking utworów na podstawie długości tytułów i ich sprzedaży.
+4. Track Title Lengths and Sales
+Analyze the relationship between track title lengths and sales.
 */
 
 WITH track_total_sale AS (
@@ -82,24 +78,125 @@ WITH track_total_sale AS (
     SUM(quantity) AS total_sale
   FROM invoice_line
   GROUP BY track_id
+), track_title_lengths AS(
+  SELECT 
+    track_id,
+    name,
+    CASE
+      WHEN LENGTH(name) <= 10 THEN 'very short'
+      WHEN LENGTH(name) <= 30 THEN 'short'
+      WHEN LENGTH(name) <= 60 THEN 'medium'
+      WHEN LENGTH(name) <= 100 THEN 'long'
+      ELSE 'very long'
+    END AS title_length
+    FROM track
 )
-/*
-ponizej 10
-od 10 do
-*/
-SELECT 
-  track_id,
-  name AS track_name,
-  LENGTH(name) AS track_name_length,
-  total_sale,
-  RANK() OVER(PARTITION BY LENGTH(name) ORDER BY total_sale DESC) AS track_rank
-FROM track_total_sale
-JOIN track
-USING(track_id)
-ORDER BY track_rank
 
 SELECT 
-name,
-LENGTH(name) AS length
-FROM track
-ORDER BY length DESC
+  title_length,
+  ROUND(AVG(total_sale), 3) AS average_sale
+FROM track_total_sale
+JOIN track_title_lengths
+USING(track_id)
+GROUP BY title_length
+ORDER BY average_sale DESC
+
+/*
+5. Keyword Analysis in Track Titles*
+Identify the most common words in track titles and their sales impact.
+*/
+
+WITH top_track_words AS (
+  SELECT 
+    words_in_tracks, 
+    COUNT(words_in_tracks) AS words_counted
+  FROM (
+    SELECT
+    REGEXP_REPLACE(LOWER(REGEXP_SPLIT_TO_TABLE(name, ' |/')), '[^a-zA-Z0-9 ]', '', 'g') AS words_in_tracks
+  FROM track
+  ) AS split
+  -- deleting stop words without semantic value
+  WHERE words_in_tracks NOT IN ('', 'the', 'of', 'a', 'in', 'to', 'no', 'on', 'do', 'de', 'and', 'for', 'o', 'it', 'da', 'is', 'be', 'all', '2', 'e', 'pt', 'from', 'with')
+  GROUP BY words_in_tracks
+  HAVING COUNT(words_in_tracks) >= 25
+  ORDER BY words_counted DESC
+)
+
+SELECT 
+  words_in_tracks,
+  words_counted,
+  COUNT(DISTINCT(track_id)) AS unique_track_count,
+  SUM(quantity) AS total_sale
+FROM top_track_words
+JOIN track
+ON track.name ~* CONCAT('\m', words_in_tracks, '\M(?!'')')
+JOIN invoice_line
+USING(track_id)
+GROUP BY words_in_tracks, words_counted
+ORDER BY unique_track_count DESC
+
+/*
+6. Highest Average Invoice Value
+Rank customers by their average invoice value.
+*/
+
+SELECT *
+FROM (
+  SELECT 
+    customer_id,
+    CONCAT(first_name, ' ', last_name) AS customer,
+    ROUND(AVG(total), 3) AS total_avg,
+    DENSE_RANK() OVER(ORDER BY ROUND(AVG(total), 3) DESC) AS customer_rank
+  FROM customer
+  JOIN invoice
+  USING(customer_id)
+  GROUP BY customer_id, first_name, last_name
+  ORDER BY total_avg DESC)
+WHERE customer_rank BETWEEN 1 AND 5
+
+/*
+7. Seasonality of Sales
+Analyze monthly sales distribution and seasonal patterns.
+*/
+
+SELECT 
+  invoice_date,
+  SUM(total) AS total_month_sale,
+  ROUND(SUM(total) / (SELECT SUM(total) FROM invoice) * 100, 3) AS percentage_of_total_sale
+FROM
+  (SELECT 
+    TO_CHAR(DATE_TRUNC('month', invoice_date), 'YYYY-MM') AS invoice_date,
+    total
+  FROM invoice) AS month_sale
+GROUP BY invoice_date
+ORDER BY invoice_date
+
+/*
+8. **Procentowy udział kategorii w sprzedaży**  
+   Napisz zapytanie, które zwróci:
+   - Identyfikator kategorii i jej nazwę.
+   - Łączną wartość sprzedaży dla każdej kategorii.
+   - Procentowy udział kategorii w całkowitej sprzedaży.
+*/
+
+WITH total_genre_sale AS (
+  SELECT SUM(unit_price * quantity) AS total_sale_value
+  FROM invoice_line
+)
+
+SELECT 
+  genre_name,
+  genre_sale_value,
+  ROUND(genre_sale_value / total_sale_value * 100, 2) AS percentage_of_total_sale_value
+FROM (
+  SELECT 
+    genre.name AS genre_name,
+    SUM(invoice_line.unit_price * quantity) AS genre_sale_value
+  FROM genre
+  JOIN track
+  USING(genre_id)
+  JOIN invoice_line
+  USING(track_id)
+  GROUP BY genre.name) AS genre_sale_value
+CROSS JOIN total_genre_sale
+ORDER BY percentage_of_total_sale_value DESC

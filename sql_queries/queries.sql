@@ -241,3 +241,40 @@ FROM (
   USING(track_id)
   GROUP BY milliseconds / 1000 
 ) AS track_sale_by_length
+
+/*
+12. Best-Selling Albums
+Determine the top revenue-generating albums.
+*/
+
+SELECT 
+  album_id,
+  SUM(invoice_line.unit_price * quantity) AS total_album_revenue
+FROM album
+JOIN track
+USING(album_id)
+JOIN invoice_line
+USING(track_id)
+GROUP BY album_id
+ORDER BY total_album_revenue DESC
+LIMIT 10;
+
+/*
+13. **Purchase Patterns by Weekday**  
+Analyze the distribution of purchases by day of the week.
+*/
+
+WITH total_invoices AS (
+  SELECT
+    COUNT(invoice_id) AS total_count
+  FROM invoice
+)
+
+SELECT
+  TO_CHAR(invoice_date, 'Day') AS invoice_day,
+  ROUND(COUNT(invoice_id) * 100.0/total_count, 2) AS invoice_percentage
+FROM invoice
+CROSS JOIN total_invoices
+GROUP BY TO_CHAR(invoice_date, 'Day'), total_count
+ORDER BY invoice_percentage DESC
+

@@ -172,11 +172,8 @@ GROUP BY invoice_date
 ORDER BY invoice_date
 
 /*
-8. **Procentowy udział kategorii w sprzedaży**  
-   Napisz zapytanie, które zwróci:
-   - Identyfikator kategorii i jej nazwę.
-   - Łączną wartość sprzedaży dla każdej kategorii.
-   - Procentowy udział kategorii w całkowitej sprzedaży.
+8. Category Sales Contribution
+Calculate each category’s percentage contribution to total sales.
 */
 
 WITH total_genre_sale AS (
@@ -200,3 +197,47 @@ FROM (
   GROUP BY genre.name) AS genre_sale_value
 CROSS JOIN total_genre_sale
 ORDER BY percentage_of_total_sale_value DESC
+
+/*
+9. Customer Spending Declines
+Identify customers whose monthly spending has decreased over time.
+*/
+
+WITH customer_monthly_spending AS (
+  SELECT 
+    customer_id,
+    CONCAT(first_name, ' ', last_name) AS customer_name,
+    TO_CHAR(DATE_TRUNC('month', invoice_date), 'YYYY-MM') AS invoice_month,
+    SUM(total) AS monthly_spending
+  FROM customer
+  JOIN invoice
+  USING(customer_id)
+  GROUP BY customer_id, first_name, last_name, invoice_date)
+
+SELECT 
+  customer_id, 
+  customer_name, 
+  invoice_month, 
+  monthly_spending,
+  LAG(invoice_month) OVER(PARTITION BY customer_id ORDER BY invoice_month) AS previous_invoice_month,
+  LAG(monthly_spending) OVER(PARTITION BY customer_id ORDER BY invoice_month) AS previous_monthly_spending,
+  monthly_spending - LAG(monthly_spending) OVER(PARTITION BY customer_id ORDER BY invoice_month) AS difference_previous_monthly_spending
+FROM customer_monthly_spending
+ORDER BY difference_previous_monthly_spending
+LIMIT 10;
+
+/*
+10. Track Length vs. Sales
+Evaluate the correlation between track length and sales.
+*/
+
+SELECT corr(track_length_seconds, track_sale) AS track_length_sale_correlation
+FROM (
+  SELECT 
+    milliseconds / 1000 AS track_length_seconds,
+    SUM(invoice_line.unit_price * quantity) AS track_sale
+  FROM track
+  JOIN invoice_line
+  USING(track_id)
+  GROUP BY milliseconds / 1000 
+) AS track_sale_by_length

@@ -235,12 +235,26 @@ SELECT corr(track_length_seconds, track_sale) AS track_length_sale_correlation
 FROM (
   SELECT 
     milliseconds / 1000 AS track_length_seconds,
-    SUM(invoice_line.unit_price * quantity) AS track_sale
+    invoice_line.unit_price * quantity AS track_sale
   FROM track
   JOIN invoice_line
   USING(track_id)
-  GROUP BY milliseconds / 1000 
 ) AS track_sale_by_length
+
+/*
+11. **Rarest customers**
+Identification of customers who have made the fewest purchases
+*/
+SELECT 
+  customer_id,
+  CONCAT(first_name, ' ', last_name) AS least_frequent_customer,
+  COUNT(invoice_id) AS number_of_purchases
+FROM invoice
+JOIN customer
+USING(customer_id)
+GROUP BY customer_id, first_name, last_name
+ORDER BY number_of_purchases
+LIMIT 1;
 
 /*
 12. Best-Selling Albums
@@ -278,3 +292,56 @@ CROSS JOIN total_invoices
 GROUP BY TO_CHAR(invoice_date, 'Day'), total_count
 ORDER BY invoice_percentage DESC
 
+/*
+14. Most Active Customers
+Find customers who purchased the most tracks.
+*/
+
+
+SELECT 
+  customer_id,
+  CONCAT(first_name, ' ', last_name) AS customer_name,
+  SUM(number_of_tracks) AS total_number_of_tracks,
+  DENSE_RANK() OVER(ORDER BY SUM(number_of_tracks) DESC) AS customer_rank
+FROM (
+  SELECT 
+    customer_id,
+    invoice_id,
+    COUNT(track_id) AS number_of_tracks
+  FROM invoice_line
+  JOIN invoice
+  USING(invoice_id)
+  GROUP BY customer_id, invoice_id) AS tracks_per_invoice
+JOIN customer
+USING(customer_id)
+GROUP BY customer_id, first_name, last_name
+
+/*
+15. Track Length Frequency
+Group tracks by length ranges and analyze their occurrence.
+*/
+
+WITH total_tracks AS (
+  SELECT
+    COUNT(track_id) AS number_of_tracks_total
+  FROM track
+)
+
+SELECT
+  lenth_category,
+  COUNT(track_id) AS number_of_tracks,
+  ROUND((COUNT(track_id) / number_of_tracks_total::numeric) * 100, 2) AS percentage_of_total
+FROM(
+  SELECT 
+    track_id,
+    CASE
+      WHEN milliseconds / 1000 BETWEEN 0 AND 59 THEN 'Less than 1 minute'
+      WHEN milliseconds / 1000 BETWEEN 60 AND 119 THEN 'Between 1 and 2 minutes'
+      WHEN milliseconds / 1000 BETWEEN 120 AND 179 THEN 'Between 2 and 3 minutes'
+      WHEN milliseconds / 1000 BETWEEN 180 AND 239 THEN 'Between 3 and 4 minutes'
+      WHEN milliseconds / 1000 BETWEEN 240 AND 299 THEN 'Between 4 and 5 minutes'
+      ELSE 'Over 5 minutes' END AS lenth_category
+  FROM track) AS track_length_category
+CROSS JOIN total_tracks
+GROUP BY lenth_category, number_of_tracks_total
+ORDER BY percentage_of_total DESC

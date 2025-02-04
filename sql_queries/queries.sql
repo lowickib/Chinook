@@ -401,3 +401,85 @@ SELECT
 FROM invoice
 CROSS JOIN market_total_sale
 GROUP BY billing_country, market_total_sale.total_sale;
+
+/*
+18. Analysis of Sales Growth Dynamics by Country
+Analyze the annual sales growth dynamics by country, including total sales, year-over-year percentage change, and country ranking based on growth trends.
+*/
+
+WITH sale_comparison AS (
+  SELECT 
+    billing_country,
+    year,
+    total_sale,
+    LAG(total_sale) OVER(PARTITION BY billing_country ORDER BY billing_country, year) AS total_sale_prev_year
+  FROM (
+    SELECT 
+      billing_country,
+      TO_CHAR(DATE_TRUNC('year', invoice_date), 'YYYY') AS year,
+      SUM(total) AS total_sale
+    FROM invoice
+    GROUP BY billing_country, DATE_TRUNC('year', invoice_date)
+    ORDER BY billing_country, DATE_TRUNC('year', invoice_date)) AS sale_by_country
+  WHERE billing_country IN (
+    SELECT DISTINCT billing_country
+    FROM invoice
+    WHERE TO_CHAR(DATE_TRUNC('year', invoice_date), 'YYYY')  IN ('2023', '2024')
+    GROUP BY billing_country
+    HAVING(COUNT(DISTINCT TO_CHAR(DATE_TRUNC('year', invoice_date), 'YYYY') )) = 2
+  ) AND year IN ('2023', '2024'))
+
+SELECT 
+  billing_country,
+  year,
+  total_sale,
+  total_sale_prev_year,
+  CONCAT(ROUND((total_sale - total_sale_prev_year)/total_sale_prev_year * 100, 1), '%') AS sales_growth
+FROM sale_comparison
+WHERE total_sale_prev_year IS NOT NULL
+ORDER BY (total_sale - total_sale_prev_year)/total_sale_prev_year * 100 DESC;
+
+/*
+19. **Customer Retention Analysis**  
+Evaluate customer retention based on purchase frequency.
+*/
+
+SELECT 
+  customer_id,
+  CONCAT(first_name, ' ', last_name) AS customer_name,
+  MIN(invoice_date) AS first_invoice,
+  MAX(invoice_date) AS last_invoice,
+  MAX(invoice_date) - MIN(invoice_date) AS time_between_first_and_last_invoice,
+  COUNT(invoice_id) AS number_of_invoices
+FROM invoice
+JOIN customer
+USING(customer_id)
+GROUP BY customer_id, first_name, last_name
+
+/*
+20. **Analiza średniego czasu między zakupami klientów**
+    Napisz zapytanie, które zwróci:
+    - Identyfikator klienta i jego pełne imię i nazwisko.
+    - Średnią liczbę dni między kolejnymi zakupami dla każdego klienta.
+    - Łączną liczbę zakupów dokonanych przez klienta.
+    - Ranking klientów według najkrótszego średniego czasu między zakupami.
+*/
+
+SELECT 
+  customer_id,
+  CONCAT(first_name, ' ', last_name),
+  AVG(time_from_prev_invoice) AS average_time_between_purchases,
+  DENSE_RANK() OVER(ORDER BY AVG(time_from_prev_invoice)) AS customer_rank_avg_time,
+  COUNT(invoice_id) AS number_of_invoices
+FROM (
+SELECT 
+  customer_id,
+  invoice_id,
+  invoice_date,
+  LAG(invoice_date) OVER(PARTITION BY customer_id ORDER BY invoice_date),
+  invoice_date - LAG(invoice_date) OVER(PARTITION BY customer_id ORDER BY invoice_date) AS time_from_prev_invoice
+FROM invoice) AS time_between_purchases
+JOIN customer
+USING(customer_id)
+WHERE time_from_prev_invoice IS NOT NULL
+GROUP BY customer_id, first_name, last_name

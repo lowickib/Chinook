@@ -24,7 +24,7 @@ FROM (
   FROM customers_total_spending_per_month
   JOIN customer
   USING(customer_id))
-WHERE monthly_customer_rank BETWEEN 1 AND 3
+WHERE monthly_customer_rank BETWEEN 1 AND 3;
 
 
 /*
@@ -46,7 +46,7 @@ SELECT
   total_spendings,
   total_spendings - LAG(total_spendings) OVER(ORDER BY month) AS prev_month_spending_diff
 FROM total_spending_per_month
-ORDER BY month
+ORDER BY month;
 
 /*
 3. Longest Gaps Between Purchases**  
@@ -65,7 +65,7 @@ SELECT
   JOIN customer
   USING(customer_id)
   ORDER BY time_diff_from_last_invoice DESC)
-WHERE previous_invoice_date IS NOT NULL
+WHERE previous_invoice_date IS NOT NULL;
 
 /*
 4. Track Title Lengths and Sales
@@ -99,7 +99,7 @@ FROM track_total_sale
 JOIN track_title_lengths
 USING(track_id)
 GROUP BY title_length
-ORDER BY average_sale DESC
+ORDER BY average_sale DESC;
 
 /*
 5. Keyword Analysis in Track Titles*
@@ -133,7 +133,7 @@ ON track.name ~* CONCAT('\m', words_in_tracks, '\M(?!'')')
 JOIN invoice_line
 USING(track_id)
 GROUP BY words_in_tracks, words_counted
-ORDER BY unique_track_count DESC
+ORDER BY unique_track_count DESC;
 
 /*
 6. Highest Average Invoice Value
@@ -152,7 +152,7 @@ FROM (
   USING(customer_id)
   GROUP BY customer_id, first_name, last_name
   ORDER BY total_avg DESC)
-WHERE customer_rank BETWEEN 1 AND 5
+WHERE customer_rank BETWEEN 1 AND 5;
 
 /*
 7. Seasonality of Sales
@@ -169,7 +169,7 @@ FROM
     total
   FROM invoice) AS month_sale
 GROUP BY invoice_date
-ORDER BY invoice_date
+ORDER BY invoice_date;
 
 /*
 8. Category Sales Contribution
@@ -196,7 +196,7 @@ FROM (
   USING(track_id)
   GROUP BY genre.name) AS genre_sale_value
 CROSS JOIN total_genre_sale
-ORDER BY percentage_of_total_sale_value DESC
+ORDER BY percentage_of_total_sale_value DESC;
 
 /*
 9. Customer Spending Declines
@@ -239,7 +239,7 @@ FROM (
   FROM track
   JOIN invoice_line
   USING(track_id)
-) AS track_sale_by_length
+) AS track_sale_by_length;
 
 /*
 11. **Rarest customers**
@@ -290,7 +290,7 @@ SELECT
 FROM invoice
 CROSS JOIN total_invoices
 GROUP BY TO_CHAR(invoice_date, 'Day'), total_count
-ORDER BY invoice_percentage DESC
+ORDER BY invoice_percentage DESC;
 
 /*
 14. Most Active Customers
@@ -314,7 +314,7 @@ FROM (
   GROUP BY customer_id, invoice_id) AS tracks_per_invoice
 JOIN customer
 USING(customer_id)
-GROUP BY customer_id, first_name, last_name
+GROUP BY customer_id, first_name, last_name;
 
 /*
 15. Track Length Frequency
@@ -344,4 +344,60 @@ FROM(
   FROM track) AS track_length_category
 CROSS JOIN total_tracks
 GROUP BY lenth_category, number_of_tracks_total
-ORDER BY percentage_of_total DESC
+ORDER BY percentage_of_total DESC;
+
+/*
+16. Top-Selling Genres
+Identify the genres that generate the highest sales.
+*/
+
+WITH total_tracks_sold AS(
+  SELECT 
+    SUM(quantity) AS number_of_tracks_sold_total
+  FROM invoice_line
+)
+
+SELECT 
+  genre_id,
+  genre_name,
+  number_of_tracks_sold,
+  ROUND((number_of_tracks_sold / number_of_tracks_sold_total::numeric) * 100, 2) AS pertentage_of_market
+FROM
+  (SELECT 
+    genre_id,
+    genre.name AS genre_name,
+    SUM(quantity) AS number_of_tracks_sold
+  FROM invoice_line
+  JOIN track
+  USING(track_id)
+  JOIN genre
+  USING(genre_id)
+  GROUP BY genre_id, genre.name) AS sale_by_category
+CROSS JOIN total_tracks_sold
+ORDER BY pertentage_of_market DESC;
+
+/*
+17. **Analiza wartości zamówień według kraju**  
+    Napisz zapytanie, które zwróci:
+    - Nazwę kraju (BillingCountry).
+    - Średnią wartość faktury dla każdego kraju.
+    - Liczbę transakcji (faktur) dla każdego kraju.
+    - Całkowity przychód wygenerowany przez klientów z danego kraju.
+    - Procentowy udział każdego kraju w całkowitej sprzedaży.
+*/
+
+WITH market_total_sale AS (
+  SELECT
+    SUM(total) AS total_sale
+  FROM invoice
+)
+
+SELECT 
+  billing_country,
+  AVG(total) AS average_total_sale,
+  COUNT(invoice_id) AS number_of_invoices,
+  SUM(total) AS total_sale,
+  ROUND((SUM(total) / market_total_sale.total_sale) * 100, 2) AS total_sale_percentrage_of_market
+FROM invoice
+CROSS JOIN market_total_sale
+GROUP BY billing_country, market_total_sale.total_sale;

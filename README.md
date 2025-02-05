@@ -241,6 +241,21 @@ USING(customer_id)
 GROUP BY customer_id, customer_name
 ORDER BY average_invoice_value DESC;
 ```
+**Results:**
+
+| Customer ID | Customer               | Average Invoice Value | Customer Rank |
+|------------|------------------------|-----------------------|--------------|
+| 6          | Helena Holý            | 7.089                 | 1            |
+| 26         | Richard Cunningham     | 6.803                 | 2            |
+| 57         | Luis Rojas             | 6.660                 | 3            |
+| 45         | Ladislav Kovács        | 6.517                 | 4            |
+| 46         | Hugh O'Reilly          | 6.517                 | 4            |
+| 28         | Julia Barnett          | 6.231                 | 5            |
+| 37         | Fynn Zimmermann        | 6.231                 | 5            |
+| 24         | Frank Ralston          | 6.231                 | 5            |
+
+![ Highest Average Invoice Value](assets/6.png)
+*Bar graph visualizing customers with highest average invoice value; ChatGPT generated this graph from SQL query results.*
 
 **7. Seasonality of Sales**
 
@@ -258,19 +273,16 @@ ORDER BY monthly_sales DESC;
 ```
 **Resutls:**
 
-### Top Customers by Average Invoice Value
+| Invoice Date | Total Monthly Sales | Percentage of Total Sales |
+|-------------|---------------------|--------------------------|
+| 2021-01     | 35.64               | 1.531%                   |
+| 2021-02     | 37.62               | 1.616%                   |
+| 2021-03     | 37.62               | 1.616%                   |
+| 2021-04     | 37.62               | 1.616%                   |
+| 2021-05     | 37.62               | 1.616%                   |
 
-| Customer ID | Customer               | Average Invoice Value | Customer Rank |
-|------------|------------------------|-----------------------|--------------|
-| 6          | Helena Holý            | 7.089                 | 1            |
-| 26         | Richard Cunningham     | 6.803                 | 2            |
-| 57         | Luis Rojas             | 6.660                 | 3            |
-| 45         | Ladislav Kovács        | 6.517                 | 4            |
-| 46         | Hugh O'Reilly          | 6.517                 | 4            |
-| 28         | Julia Barnett          | 6.231                 | 5            |
-| 37         | Fynn Zimmermann        | 6.231                 | 5            |
-| 24         | Frank Ralston          | 6.231                 | 5            |
-
+![Seasonality of Sales](assets/7.png)
+*Line graph visualizing seasonality of sales; ChatGPT generated this graph from SQL query results.*
 
 **8. Category Sales Contribution**
 
@@ -291,6 +303,18 @@ JOIN category c ON g.category_id = c.category_id
 GROUP BY category_name
 ORDER BY total_sales DESC;
 ```
+**Results:**
+
+| Category Name         | Sales Value | Percentage of Total Sales |
+|----------------------|------------|---------------------------|
+| Rock                | 826.65     | 35.50%                    |
+| Latin               | 382.14     | 16.41%                    |
+| Metal               | 261.36     | 11.22%                    |
+| Alternative & Punk  | 241.56     | 10.37%                    |
+| TV Shows           | 93.53      | 4.02%                     |
+
+![Category Sales Contribution](assets/8.png)
+*Bar and line graph visualizing sales and percentage of total sales per category; ChatGPT generated this graph from SQL query results.*
 
 **9. Customer Spending Declines**
 
@@ -314,6 +338,17 @@ total_spending - LAG(total_spending) OVER (PARTITION BY customer_id ORDER BY mon
 FROM monthly_spending
 ORDER BY spending_change ASC;
 ```
+**Results:**
+| Customer ID | Customer Name         | Invoice Month | Monthly Spending | Previous Invoice Month | Previous Monthly Spending | Spending Decline |
+|------------|-----------------------|--------------|------------------|------------------------|--------------------------|------------------|
+| 57         | Luis Rojas             | 2023-08      | 1.98             | 2022-01                | 17.91                     | -15.93           |
+| 26         | Richard Cunningham     | 2025-04      | 8.91             | 2024-08                | 23.86                     | -14.95           |
+| 45         | Ladislav Kovács        | 2022-10      | 8.91             | 2022-02                | 21.86                     | -12.95           |
+| 46         | Hugh O'Reilly          | 2023-12      | 8.91             | 2023-04                | 21.86                     | -12.95           |
+| 37         | Fynn Zimmermann        | 2024-11      | 1.98             | 2023-04                | 14.91                     | -12.93           |
+
+![Customer Spending Declines Over Time](assets/9.png)
+*Bar graph visualizing the customer spending declines; ChatGPT generated this graph from SQL query results.*
 
 **10. Track Length vs. Sales**
 
@@ -334,7 +369,10 @@ JOIN invoice_line il ON t.track_id = il.track_id
 GROUP BY track_length_category
 ORDER BY avg_sales DESC;
 ```
-
+**Results:**
+| Track Length & Sale Coreelation  | 
+|------------|
+| 0.9335378478105226         |
 ---
 
 ### **Tasks 11-20**
@@ -356,6 +394,11 @@ GROUP BY customer_id, customer_name
 ORDER BY total_purchases ASC
 LIMIT 10;
 ```
+**Results:**
+| Customer ID | Least Frequent Customer | Number of Purchases |
+|-------------|-------------------------|---------------------|
+| 59          | Puja Srivastava          | 6                   |
+
 
 **12. Best-Selling Albums**
 
@@ -375,6 +418,20 @@ GROUP BY album_id, album_title
 ORDER BY total_sales DESC
 LIMIT 10;
 ```
+**Results:**
+| Album ID | Total Album Revenue |
+|----------|---------------------|
+| 253      | 35.82               |
+| 251      | 31.84               |
+| 23       | 26.73               |
+| 231      | 25.87               |
+| 228      | 25.87               |
+| 141      | 25.74               |
+| 73       | 24.75               |
+| 227      | 23.88               |
+| 229      | 21.89               |
+| 224      | 21.78               |
+
 
 **13. Purchase Patterns by Weekday**
 
@@ -390,6 +447,19 @@ FROM invoice
 GROUP BY day_of_week
 ORDER BY total_purchases DESC;
 ```
+**Results:**
+| Invoice Day | Invoice Percentage |
+|-------------|--------------------|
+| Monday      | 14.56              |
+| Thursday    | 14.32              |
+| Tuesday     | 14.32              |
+| Saturday    | 14.32              |
+| Friday      | 14.32              |
+| Wednesday   | 14.08              |
+| Sunday      | 14.08              |
+
+![Distribution of Purchases by Day of the Week](assets/13.png)
+*Bar graph visualizing the distribution of purchases by day of the week; ChatGPT generated this graph from SQL query results.*
 
 **14. Most Active Customers**
 
@@ -409,6 +479,19 @@ GROUP BY customer_id, customer_name
 ORDER BY total_purchases DESC
 LIMIT 10;
 ```
+**Results:**
+| Customer ID | Customer Name      | Total Number of Tracks | Customer Rank |
+|-------------|--------------------|------------------------|---------------|
+| 30          | Edward Francis     | 38                     | 1             |
+| 34          | João Fernandes     | 38                     | 1             |
+| 19          | Tim Goyer          | 38                     | 1             |
+| 26          | Richard Cunningham | 38                     | 1             |
+| 37          | Fynn Zimmermann    | 38                     | 1             |
+| 55          | Mark Taylor        | 38                     | 1             |
+| 46          | Hugh O'Reilly      | 38                     | 1             |
+| 13          | Fernanda Ramos     | 38                     | 1             |
+| 24          | Frank Ralston      | 38                     | 1             |
+| 49          | Stanisław Wójcik   | 38                     | 1             |
 
 **15. Track Length Frequency**
 
@@ -428,6 +511,18 @@ FROM track
 GROUP BY track_length_category
 ORDER BY track_count DESC;
 ```
+**Results:**
+| Length Category                | Number of Tracks | Percentage of Total |
+|---------------------------------|------------------|---------------------|
+| Over 5 minutes                 | 1069             | 30.52               |
+| Between 3 and 4 minutes        | 982              | 28.03               |
+| Between 4 and 5 minutes        | 972              | 27.75               |
+| Between 2 and 3 minutes        | 387              | 11.05               |
+| Between 1 and 2 minutes        | 66               | 1.88                |
+| Less than 1 minute             | 27               | 0.77                |
+
+![Number of Tracks by Length Category](assets/15.png)
+*Bar graph visualizing the number of tracks by length category; ChatGPT generated this graph from SQL query results.*
 
 **16. Top-Selling Genres**
 
@@ -446,6 +541,19 @@ GROUP BY genre
 ORDER BY total_sales DESC
 LIMIT 10;
 ```
+**Results:**
+| Genre ID | Genre Name        | Number of Tracks Sold | Percentage of Market |
+|----------|-------------------|-----------------------|----------------------|
+| 1        | Rock              | 835                   | 37.28                |
+| 7        | Latin             | 386                   | 17.23                |
+| 3        | Metal             | 264                   | 11.79                |
+| 4        | Alternative & Punk | 244                   | 10.89                |
+| 2        | Jazz              | 80                    | 3.57                 |
+| 6        | Blues             | 61                    | 2.72                 |
+| 19       | TV Shows          | 47                    | 2.10                 |
+| 24       | Classical         | 41                    | 1.83                 |
+| 14       | R&B/Soul          | 41                    | 1.83                 |
+| 8        | Reggae            | 30                    | 1.34                 |
 
 **17. Order Value Analysis by Country**
 
@@ -462,11 +570,24 @@ FROM invoice
 GROUP BY billing_country
 ORDER BY total_sales DESC;
 ```
+**Results:**
+| Billing Country | Average Total Sale | Number of Invoices | Total Sale | Total Sale Percentage of Market |
+|-----------------|--------------------|--------------------|------------|----------------------------------|
+| India           | 5.79               | 13                 | 75.26      | 3.23                             |
+| Finland         | 5.95               | 7                  | 41.62      | 1.79                             |
+| Portugal        | 5.52               | 14                 | 77.24      | 3.32                             |
+| United Kingdom  | 5.37               | 21                 | 112.86     | 4.85                             |
+| Argentina       | 5.37               | 7                  | 37.62      | 1.62                             |
+| Australia       | 5.37               | 7                  | 37.62      | 1.62                             |
+| Canada          | 5.43               | 56                 | 303.96     | 13.05                            |
+| Italy           | 5.37               | 7                  | 37.62      | 1.62                             |
+| Ireland         | 6.52               | 7                  | 45.62      | 1.96                             |
+| Chile           | 6.66               | 7                  | 46.62      | 2.00                             |
+
 
 **18. Analysis of Sales Growth Dynamics by Country**
 
 **Task:** Analyze the annual sales growth dynamics by country, including total sales, year-over-year percentage change, and country ranking based on growth trends.
-
 
 **Query:**
 
@@ -487,6 +608,26 @@ total_sales - LAG(total_sales) OVER(PARTITION BY billing_country ORDER BY year) 
 FROM yearly_sales
 ORDER BY billing_country, year;
 ```
+**Results:**
+| Billing Country    | Year | Total Sale | Total Sale Previous Year | Sales Growth |
+|--------------------|------|------------|--------------------------|--------------|
+| Australia          | 2024 | 22.77      | 1.98                     | 1050.0%      |
+| Portugal          | 2024 | 24.77      | 8.91                     | 178.0%       |
+| Brazil            | 2024 | 53.46      | 19.80                    | 170.0%       |
+| Czech Republic    | 2024 | 19.83      | 12.87                    | 54.1%        |
+| USA               | 2024 | 127.98     | 103.01                   | 24.2%        |
+| Chile             | 2024 | 6.93       | 5.94                     | 16.7%        |
+| France            | 2024 | 36.66      | 42.61                    | -14.0%       |
+| Canada            | 2024 | 42.57      | 55.44                    | -23.2%       |
+| United Kingdom    | 2024 | 9.90       | 17.82                    | -44.4%       |
+| Norway            | 2024 | 8.91       | 17.84                    | -50.1%       |
+| India             | 2024 | 10.89      | 24.75                    | -56.0%       |
+| Germany           | 2024 | 18.81      | 48.57                    | -61.3%       |
+| Netherlands       | 2024 | 0.99       | 12.90                    | -92.3%       |
+| Finland           | 2024 | 0.99       | 15.88                    | -93.8%       |
+
+![Sales Growth by Country in 2024](assets/18.png)
+*Bar graph visualizing sales growth by country in 2024; ChatGPT generated this graph from SQL query results.*
 
 **19. Customer Retention Analysis**
 
@@ -495,24 +636,32 @@ ORDER BY billing_country, year;
 **Query:**
 
 ```sql
-WITH purchase_frequency AS (
-SELECT
-customer_id,
-COUNT(invoice_id) AS total_purchases
+SELECT 
+  customer_id,
+  CONCAT(first_name, ' ', last_name) AS customer_name,
+  MIN(invoice_date) AS first_invoice,
+  MAX(invoice_date) AS last_invoice,
+  MAX(invoice_date) - MIN(invoice_date) AS time_between_first_and_last_invoice,
+  COUNT(invoice_id) AS number_of_invoices
 FROM invoice
-GROUP BY customer_id
-)
-SELECT
-customer_id,
-total_purchases,
-CASE
-WHEN total_purchases = 1 THEN 'One-time buyer'
-WHEN total_purchases BETWEEN 2 AND 5 THEN 'Occasional buyer'
-ELSE 'Frequent buyer'
-END AS customer_segment
-FROM purchase_frequency
-ORDER BY total_purchases DESC;
+JOIN customer
+USING(customer_id)
+GROUP BY customer_id, first_name, last_name
 ```
+**Results:**
+| Customer ID | Customer Name     | First Invoice          | Last Invoice           | Time Between Invoices (Days) | Number of Invoices |
+|-------------|-------------------|------------------------|------------------------|-----------------------------|--------------------|
+| 16          | Frank Harris      | 2021-02-19 00:00:00    | 2025-07-04 00:00:00    | 1596                        | 7                  |
+| 18          | Michelle Brooks   | 2022-05-12 00:00:00    | 2025-10-08 00:00:00    | 1245                        | 7                  |
+| 34          | João Fernandes    | 2021-05-05 00:00:00    | 2024-10-01 00:00:00    | 1245                        | 7                  |
+| 17          | Jack Smith        | 2021-03-04 00:00:00    | 2024-07-31 00:00:00    | 1245                        | 7                  |
+| 50          | Enrique Muñoz     | 2021-06-23 00:00:00    | 2025-11-05 00:00:00    | 1596                        | 7                  |
+| 19          | Tim Goyer         | 2021-03-04 00:00:00    | 2024-09-13 00:00:00    | 1289                        | 7                  |
+| 6           | Helena Holý       | 2021-07-11 00:00:00    | 2025-11-13 00:00:00    | 1586                        | 7                  |
+| 26          | Richard Cunningham| 2021-11-07 00:00:00    | 2025-04-05 00:00:00    | 1245                        | 7                  |
+| 36          | Hannah Schneider  | 2021-05-05 00:00:00    | 2024-11-14 00:00:00    | 1289                        | 7                  |
+| 3           | François Tremblay | 2022-03-11 00:00:00    | 2025-09-20 00:00:00    | 1289                        | 7                  |
+
 
 **20. Analysis of Average Time Between Customer Purchases**
 
@@ -536,6 +685,19 @@ WHERE previous_purchase_date IS NOT NULL
 GROUP BY customer_id
 ORDER BY avg_days_between_purchases ASC;
 ```
+**Results:**
+| Customer ID | Customer Name        | Average Time Between Purchases (Days) | Customer Rank Average Time | Number of Invoices |
+|-------------|----------------------|---------------------------------------|----------------------------|--------------------|
+| 1           | Luís Gonçalves       | 207                                   | 1                          | 6                  |
+| 34          | João Fernandes       | 207                                   | 1                          | 6                  |
+| 18          | Michelle Brooks      | 207                                   | 1                          | 6                  |
+| 17          | Jack Smith           | 207                                   | 1                          | 6                  |
+| 26          | Richard Cunningham   | 207                                   | 1                          | 6                  |
+| 5           | František Wichterlová| 207                                   | 1                          | 6                  |
+| 55          | Mark Taylor          | 207                                   | 1                          | 6                  |
+| 39          | Camille Bernard      | 207                                   | 1                          | 6                  |
+| 13          | Fernanda Ramos       | 207                                   | 1                          | 6                  |
+| 47          | Lucas Mancini        | 207                                   | 1                          | 6                  |
 
 ---
 

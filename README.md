@@ -1,4 +1,11 @@
 # Chinook Database Analysis
+## Table of Contents 📖
+1. [Summary 📊](#Summary)
+2. [Overview 🔍](#Overview)
+3. [Objectives 🎯](#Objectives)
+4. [Tasks ✅](#Tasks)
+5. [What I Learned 📚](#What-I-Learned)
+6. [Conclusions  🏁](#Conclusions)
 
 ## Summary 📊
 This analysis explores customer spending behavior, sales trends, and purchasing patterns using SQL queries on the Chinook database. The findings highlight key insights into revenue-driving factors, customer retention, and product performance.
@@ -801,7 +808,7 @@ GROUP BY customer_id, first_name, last_name;
 
 ---
 
-## What I Learned
+## What I Learned 📚
 ### 1. Advanced SQL Queries 🛠️
 
 - Learned how to use Common Table Expressions (CTEs) and window functions such as `DENSE_RANK()` and `LAG()` to analyze customer spending trends and purchasing behaviors.

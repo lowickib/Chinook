@@ -454,7 +454,7 @@ SELECT
 FROM invoice
 JOIN customer
 USING(customer_id)
-GROUP BY customer_id, first_name, last_name
+GROUP BY customer_id, first_name, last_name;
 
 /*
 20. **Analiza średniego czasu między zakupami klientów**
@@ -482,4 +482,4 @@ FROM invoice) AS time_between_purchases
 JOIN customer
 USING(customer_id)
 WHERE time_from_prev_invoice IS NOT NULL
-GROUP BY customer_id, first_name, last_name
+GROUP BY customer_id, first_name, last_name;

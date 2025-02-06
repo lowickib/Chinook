@@ -69,7 +69,7 @@ WHERE monthly_customer_rank BETWEEN 1 AND 3;
 ![Monthly Spending Ranking](assets/1.png)
 *Bar graph visualizing the top-spending customers each month using rankings; ChatGPT generated this graph from SQL query results.*
 
-### 2. Sales Trends Analysis**
+### 2. Sales Trends Analysis
 
 **Task:** Track monthly sales and compare trends over time.
 
@@ -109,7 +109,7 @@ ORDER BY month;
 ![Monthly Spending Over Tine](assets/2_2.png)
 *Line graph visualizing the sales trends analysis - monthly spedning over time; ChatGPT generated this graph from SQL query results.*
 
-### 3. Longest Gaps Between Purchases**
+### 3. Longest Gaps Between Purchases
 
 **Task:** Find the longest time gaps between customer purchases.
 
@@ -140,7 +140,7 @@ WHERE previous_invoice_date IS NOT NULL;
 | 12         | Roberto Almeida       | 2025-03-31        | 2023-08-25           | {"days": 584}              |
 | 3          | François Tremblay     | 2024-07-26        | 2022-12-20           | {"days": 584}              |
 
-### 4. Track Title Lengths and Sales**
+### 4. Track Title Lengths and Sales
 
 **Task:** Analyze the relationship between track title lengths and sales.
 
@@ -188,7 +188,7 @@ ORDER BY average_sale DESC;
 ![Average Sales by Title Length](assets/4.png)
 *Bar graph visualizing the relationship between track title lengths and sales; ChatGPT generated this graph from SQL query results.*
 
-### 5. Keyword Analysis in Track Titles**
+### 5. Keyword Analysis in Track Titles
 
 **Task:** Identify the most common words in track titles and their sales impact.
 **Query:**
@@ -236,7 +236,7 @@ ORDER BY unique_track_count DESC;
 ![Most Frequent Words in Tracks: Sales and Occurrences](assets/5.png)
 *Bar graph visualizing the most frequent words in tracks: sales and occurrences; ChatGPT generated this graph from SQL query results.*
 
-### 6. Highest Average Invoice Value**
+### 6. Highest Average Invoice Value
 
 **Task:** Rank customers by their average invoice value.
 
@@ -273,7 +273,7 @@ WHERE customer_rank BETWEEN 1 AND 5;
 ![ Highest Average Invoice Value](assets/6.png)
 *Bar graph visualizing customers with highest average invoice value; ChatGPT generated this graph from SQL query results.*
 
-### 7. Seasonality of Sales**
+### 7. Seasonality of Sales
 
 **Task:** Analyze monthly sales distribution and seasonal patterns.
 
@@ -305,7 +305,7 @@ ORDER BY invoice_date;
 ![Seasonality of Sales](assets/7.png)
 *Line graph visualizing seasonality of sales; ChatGPT generated this graph from SQL query results.*
 
-### 8. Category Sales Contribution**
+### 8. Category Sales Contribution
 
 **Task:** Calculate each category’s percentage contribution to total sales.
 
@@ -347,7 +347,7 @@ ORDER BY percentage_of_total_sale_value DESC;
 ![Category Sales Contribution](assets/8.png)
 *Bar and line graph visualizing sales and percentage of total sales per category; ChatGPT generated this graph from SQL query results.*
 
-### 9. Customer Spending Declines**
+### 9. Customer Spending Declines
 
 **Task:** Identify customers whose monthly spending has decreased over time.
 **Query:**
@@ -388,7 +388,7 @@ LIMIT 10;
 ![Customer Spending Declines Over Time](assets/9.png)
 *Bar graph visualizing the customer spending declines; ChatGPT generated this graph from SQL query results.*
 
-### 10. Track Length vs. Sales**
+### 10. Track Length vs. Sales
 
 **Task:** Evaluate the correlation between track length and sales.
 
@@ -411,7 +411,7 @@ FROM (
 | 0.9335378478105226         |
 ---
 
-### 11. Rarest Customers**
+### 11. Rarest Customers
 
 **Task:** Identify customers who have made the fewest purchases.
 
@@ -435,7 +435,7 @@ LIMIT 1;
 | 59          | Puja Srivastava          | 6                   |
 
 
-### 12. Best-Selling Albums**
+### 12. Best-Selling Albums
 
 **Task:** Determine the top revenue-generating albums.
 
@@ -469,7 +469,7 @@ LIMIT 10;
 | 224      | 21.78               |
 
 
-### 13. Purchase Patterns by Weekday**
+### 13. Purchase Patterns by Weekday
 
 **Task:** Analyze the distribution of purchases by day of the week.
 
@@ -504,7 +504,7 @@ ORDER BY invoice_percentage DESC;
 ![Distribution of Purchases by Day of the Week](assets/13.png)
 *Bar graph visualizing the distribution of purchases by day of the week; ChatGPT generated this graph from SQL query results.*
 
-### 14. Most Active Customers**
+### 14. Most Active Customers
 
 **Task:** Find customers who purchased the most tracks.
 
@@ -543,7 +543,7 @@ GROUP BY customer_id, first_name, last_name;
 | 24          | Frank Ralston      | 38                     | 1             |
 | 49          | Stanisław Wójcik   | 38                     | 1             |
 
-### 15. Track Length Frequency**
+### 15. Track Length Frequency
 
 **Task:** Group tracks by length ranges and analyze their occurrence.
 
@@ -588,7 +588,7 @@ ORDER BY percentage_of_total DESC;
 ![Number of Tracks by Length Category](assets/15.png)
 *Bar graph visualizing the number of tracks by length category; ChatGPT generated this graph from SQL query results.*
 
-### 16. Top-Selling Genres**
+### 16. Top-Selling Genres
 
 **Task:** Identify the genres that generate the highest sales.
 
@@ -634,7 +634,7 @@ ORDER BY pertentage_of_market DESC;
 | 14       | R&B/Soul          | 41                    | 1.83                 |
 | 8        | Reggae            | 30                    | 1.34                 |
 
-### 17. Order Value Analysis by Country**
+### 17. Order Value Analysis by Country
 
 **Task:** Analyze the average order value across different countries to identify high-spending regions and their contribution to total revenue.
 
@@ -672,7 +672,7 @@ GROUP BY billing_country, market_total_sale.total_sale;
 | Chile           | 6.66               | 7                  | 46.62      | 2.00                             |
 
 
-### 18. Analysis of Sales Growth Dynamics by Country**
+### 18. Analysis of Sales Growth Dynamics by Country
 
 **Task:** Analyze the annual sales growth dynamics by country, including total sales, year-over-year percentage change, and country ranking based on growth trends.
 
@@ -732,7 +732,7 @@ ORDER BY (total_sale - total_sale_prev_year)/total_sale_prev_year * 100 DESC;
 ![Sales Growth by Country in 2024](assets/18.png)
 *Bar graph visualizing sales growth by country in 2024; ChatGPT generated this graph from SQL query results.*
 
-### 19. Customer Retention Analysis**
+### 19. Customer Retention Analysis
 
 **Task:** Evaluate customer retention based on purchase frequency.
 
@@ -766,7 +766,7 @@ GROUP BY customer_id, first_name, last_name;
 | 3           | François Tremblay | 2022-03-11 00:00:00    | 2025-09-20 00:00:00    | 1289                        | 7                  |
 
 
-### 20. Analysis of Average Time Between Customer Purchases**
+### 20. Analysis of Average Time Between Customer Purchases
 
 **Task:** Analyze the average number of days between consecutive purchases for each customer to identify the most frequent buyers and assess customer loyalty.
 
